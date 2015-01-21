@@ -13,7 +13,7 @@ module Guessr
 
     class Hangman < Base
       validates :answer, presence: true,
-        format: { with: /^[a-z]+$/, message: "only lowercase words allowed"}
+        format: { with: /\a[a-z]+\z/, message: "only lowercase words allowed"}
       serialize :guesses
       before_save :set_finished!, if: :finished?
 
@@ -31,6 +31,39 @@ module Guessr
         self.finished = true
       end
     end
+
+    class NumberGuessingGame < Base
+      def initialize
+        self.random_number = rand(100)
+        self.guess = ""
+        self.guess_count = 0
+        self.guessed_it = false
+      end
+
+      def guessed_it?(guess)
+        if random_number != guess
+          return false
+        else
+          return true
+        end
+      end
+
+      def game
+        until guessed_it?(guess) do
+          puts "Guess a number between 0 and 100"
+          guess = gets.to_i
+
+          guess_count += 1
+          
+          if guess > random_number
+            puts "#{guess} is too high.  Try again."
+          elsif guess < random_number
+            puts "#{guess} is too low.  Try again."
+          end
+        end
+
+        puts "It took you #{guess_count} guesses to guess my number: #{random_number}."
+      end
 
     class BasicSchema < V 1.0
       def self.up
@@ -61,6 +94,20 @@ module Guessr
 
       def self.down
         remove_column Hangman.table_name, :player_id
+      end
+    end
+
+    class AddNumberGuessingGame < V 2.0
+      def self.up
+        create_table NumberGuessingGame.table_name do |t|
+          t.integer :player_id
+          t.integer :random_number
+          t.integer :guess_count
+          guessed_it? :boolean
+      end
+
+      def self.down
+        drop_table NumberGuessingGame.table_name
       end
     end
   end

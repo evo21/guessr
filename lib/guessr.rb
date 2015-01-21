@@ -64,6 +64,7 @@ module Guessr
 
         puts "It took you #{guess_count} guesses to guess my number: #{random_number}."
       end
+    end
 
     class BasicSchema < V 1.0
       def self.up
@@ -115,4 +116,5 @@ end
 
 def Guessr.create
   Guessr::Models.create_schema
+end
 end
